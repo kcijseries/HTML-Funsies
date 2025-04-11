@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balloon Hangman</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400&display=swap">
+    <style>
+        html, body {
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Lexend', sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .screen {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2vh;
+            box-sizing: border-box;
+        }
+
+        /* Player Entry Screen */
+        #player-entry {
+            gap: 1.5vh;
+        }
+
+        #player-entry h1 {
+            font-size: 3.75vh;
+            margin: 0 0 1.5vh 0;
+        }
+
+        .player-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75vh;
+            width: 90%;
+            max-height: 52.5vh;
+            overflow-y: hidden;
+        }
+
+        .player-row {
+            display: flex;
+            justify-content: center;
+            gap: 1.5vh;
+            width: 100%;
+        }
+
+        .player-entry {
+            display: flex;
+            align-items: center;
+            gap: 0.75vh;
+        }
+
+        .player-input-container label {
+            font-size: 2.625vh;
+            white-space: nowrap;
+        }
+
+        .player-input-container input {
+            padding: 0.75vh;
+            font-size: 2.625vh;
+            width: 20vw;
+            max-width: 20vw;
+            border: 0.15vh solid #ffffff;
+            border-radius: 0.375vh;
+            background-color: #333333;
+            color: #ffffff;
+            font-family: 'Lexend', sans-serif;
+            box-sizing: border-box;
+        }
+
+        .player-input-container input.invalid {
+            border-color: #f44336;
+        }
+
+        #start-multiplayer-btn {
+            padding: 1.125vh 2.25vh;
+            font-size: 1.875vh;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 0.375vh;
+            cursor: pointer;
+            font-family: 'Lexend', sans-serif;
+            margin-top: 1.5vh;
+        }
+
+        #start-multiplayer-btn:hover:not(:disabled) {
+            background-color: #1976D2;
+        }
+
+        #start-multiplayer-btn:disabled {
+            background-color: #666666;
+            cursor: not-allowed;
+        }
+
+        /* Main Game Screen */
+        #main-game {
+            padding: 0;
+        }
+
+        .main-container {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            gap: 2vh;
+            align-items: stretch;
+        }
+
+        #picturecontainer {
+            width: 30vw;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1vh;
+        }
+
+        #balloon-image {
+            width: 100%;
+            height: auto;
+            max-height: 50vh;
+            object-fit: contain;
+        }
+
+        #player-scores {
+            font-size: 2.5vh;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1vh;
+            padding: 0 1vh;
+            max-height: 20vh;
+        }
+
+        #player-scores div {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #gamecontainer {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2vh;
+            padding: 2vh;
+            box-sizing: border-box;
+        }
+
+        #messagescontainer {
+            font-size: 3vh;
+            color: #cccccc;
+            min-height: 4vh;
+            text-align: center;
+            width: 100%;
+        }
+
+        #attempts-remaining {
+            font-size: 2.5vh;
+            color: #cccccc;
+            text-align: center;
+            width: 100%;
+        }
+
+        #queue-counter {
+            font-size: 2.5vh;
+            color: #ffffff;
+            letter-spacing: 0.2vh;
+        }
+
+        #guesscontainer {
+            font-size: 6.25vh;
+            letter-spacing: 0.5vh;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1vh;
+            color: #ffffff;
+            line-height: 1.5;
+            width: 100%;
+            max-height: 20vh;
+            overflow: hidden;
+        }
+
+        .word-wrapper {
+            white-space: nowrap;
+        }
+
+        .letter-space {
+            display: inline-block;
+            width: 5vh;
+            text-align: center;
+            border-bottom: 0.3vh solid #ffffff;
+        }
+
+        #letterscontainer {
+            display: grid;
+            grid-template-rows: repeat(4, 1fr);
+            gap: 1vh;
+            width: 100%;
+            max-width: 60vw;
+            max-height: 30vh;
+        }
+
+        .letter-row {
+            display: flex;
+            justify-content: center;
+            gap: 1vh;
+        }
+
+        .letter-btn {
+            width: 5vh;
+            height: 5vh;
+            font-size: 2.5vh;
+            border: 0.2vh solid #ffffff;
+            border-radius: 0.5vh;
+            background-color: #333333;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .letter-btn:hover:not(:disabled) {
+            background-color: #555555;
+        }
+
+        .letter-btn:disabled {
+            background-color: #222222;
+            color: #666666;
+            cursor: not-allowed;
+        }
+
+        .letter-btn.correct {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .letter-btn.incorrect {
+            background-color: #f44336;
+            color: white;
+        }
+
+        #inputcontainer {
+            display: flex;
+            flex-direction: column; /* Stack vertically */
+            align-items: center; /* Center items */
+            gap: 1vh;
+            width: 100%;
+        }
+
+        #word-input {
+            padding: 1vh;
+            font-size: 2vh;
+            width: 25vw;
+            border: 0.2vh solid #ffffff;
+            border-radius: 0.5vh;
+            background-color: #333333;
+            color: #ffffff;
+            font-family: 'Lexend', sans-serif;
+        }
+
+        #word-input.invalid {
+            border-color: #f44336;
+        }
+
+        #word-input.valid {
+            border-color: #4CAF50;
+        }
+
+        button {
+            padding: 0.75vh 1.5vh;
+            font-size: 1.5vh;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 0.5vh;
+            cursor: pointer;
+            font-family: 'Lexend', sans-serif;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #1976D2;
+        }
+
+        button:disabled {
+            background-color: #666666;
+            cursor: not-allowed;
+        }
+
+        #start-game {
+            margin-top: 1vh; /* Space above Start Game button */
+        }
+
+        #next-btn {
+            display: none;
+        }
+
+        #hint-btn {
+            padding: 1.125vh 2.25vh; /* 50% larger than default button padding */
+            font-size: 2.25vh; /* 50% larger than default 1.5vh */
+            background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet, red);
+            background-size: 200% 100%;
+            color: white;
+            animation: rainbow 3s linear infinite;
+        }
+
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        /* Final Screen */
+        #final-screen {
+            gap: 2vh;
+            position: relative;
+        }
+
+        #final-screen h1 {
+            font-size: 12vh;
+            margin: 0;
+            background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet, red);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: rainbow 3s linear infinite;
+        }
+
+        #final-screen p {
+            font-size: 5vh;
+            margin: 1vh 0;
+        }
+
+        #final-scores {
+            font-size: 3.5vh;
+            width: 90%;
+            max-width: 40vw;
+            max-height: 30vh;
+        }
+
+        #final-scores div {
+            display: flex;
+            justify-content: space-between;
+            padding: 1vh 0;
+        }
+
+        #play-again-btn {
+            padding: 1.5vh 3vh;
+            font-size: 2.5vh;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 0.5vh;
+            cursor: pointer;
+            font-family: 'Lexend', sans-serif;
+            margin-top: 2vh;
+        }
+
+        #play-again-btn:hover {
+            background-color: #1976D2;
+        }
+
+        /* Confetti */
+        .confetti {
+            position: absolute;
+            width: 1vh;
+            height: 1vh;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fall 5s linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+        }
+
+        /* Media Query for Smaller Screens */
+        @media (max-width: 700px) {
+            .main-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            #picturecontainer {
+                width: 80vw;
+            }
+            #gamecontainer {
+                width: 100%;
+            }
+            #guesscontainer {
+                font-size: 5vh;
+            }
+            .letter-space {
+                width: 3.75vh;
+            }
+            #player-scores {
+                font-size: 2vh;
+                grid-template-columns: repeat(2, 1fr);
+            }
+            #letterscontainer {
+                max-width: 80vw;
+            }
+            .letter-btn {
+                width: 3.75vh;
+                height: 3.75vh;
+                font-size: 1.875vh;
+            }
+            #word-input {
+                width: 50vw;
+            }
+            .player-row {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.75vh;
+            }
+            .player-entry {
+                width: 100%;
+                justify-content: center;
+            }
+            .player-input-container input {
+                width: 50vw;
+                max-width: 50vw;
+            }
+            #final-screen h1 {
+                font-size: 8vh;
+            }
+            #hint-btn {
+                padding: 0.75vh 1.5vh; /* Smaller padding on mobile */
+                font-size: 1.5vh; /* Smaller font on mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Player Entry Screen -->
+    <div id="player-entry" class="screen">
+        <h1>Balloon Hangman</h1>
+        <div class="player-input-container">
+            <div class="player-row">
+                <div class="player-entry">
+                    <label for="player1">Player 1:</label>
+                    <input type="text" id="player1" maxlength="16" placeholder="Enter name">
+                </div>
+                <div class="player-entry">
+                    <label for="player2">Player 2:</label>
+                    <input type="text" id="player2" maxlength="16" placeholder="Enter name">
+                </div>
+            </div>
+            <div class="player-row">
+                <div class="player-entry">
+                    <label for="player3">Player 3:</label>
+                    <input type="text" id="player3" maxlength="16" placeholder="Enter name">
+                </div>
+                <div class="player-entry">
+                    <label for="player4">Player 4:</label>
+                    <input type="text" id="player4" maxlength="16" placeholder="Enter name">
+                </div>
+            </div>
+            <div class="player-row">
+                <div class="player-entry">
+                    <label for="player5">Player 5:</label>
+                    <input type="text" id="player5" maxlength="16" placeholder="Enter name">
+                </div>
+                <div class="player-entry">
+                    <label for="player6">Player 6:</label>
+                    <input type="text" id="player6" maxlength="16" placeholder="Enter name">
+                </div>
+            </div>
+        </div>
+        <button id="start-multiplayer-btn" disabled>START</button>
+    </div>
+
+    <!-- Main Game Screen -->
+    <div id="main-game" class="screen" style="display: none;">
+        <div class="main-container">
+            <div id="picturecontainer">
+                <img id="balloon-image" src="balloons7.jpg" alt="Balloons">
+                <div id="player-scores"></div>
+            </div>
+            <div id="gamecontainer">
+                <div id="messagescontainer"></div>
+                <div id="attempts-remaining"></div>
+                <div id="guesscontainer"></div>
+                <div id="letterscontainer"></div>
+                <div id="inputcontainer">
+                    <div id="queue-counter"></div>
+                    <input type="text" id="word-input" placeholder="Enter word or phrase">
+                    <button id="hint-btn">Hint</button>
+                    <button id="start-game">Start Game</button>
+                    <button id="next-btn">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Screen -->
+    <div id="final-screen" class="screen" style="display: none;">
+        <h1 id="winner-name"></h1>
+        <p>You Win!</p>
+        <div id="final-scores"></div>
+        <button id="play-again-btn">Play Again</button>
+    </div>
+
+    <script>
+        let wordQueue = [];
+        let currentWord = '';
+        let attemptsLeft = 7;
+        let guessedLetters = [];
+        let currentWordIndex = 0;
+        let players = [];
+        let currentPlayerIndex = 0;
+
+        const balloonImages = [
+            'balloons7.jpg', 'balloons6.jpg', 'balloons5.jpg',
+            'balloons4.jpg', 'balloons3.jpg', 'balloons2.jpg',
+            'balloons1.jpg', 'balloons0.jpg', 'youwin.jpg'
+        ];
+
+        const soundFiles = {
+            correct: ['correct.mp3', 'correct.ogg'],
+            wrong: ['wrong.mp3', 'wrong.ogg'],
+            win: ['youwin.mp3', 'youwin.ogg'],
+            lose: ['youlose.mp3', 'youlose.ogg'],
+            background: ['silence.mp3', 'silence.ogg']
+        };
+
+        // Preload Assets
+        function preloadAssets() {
+            balloonImages.forEach(src => {
+                const img = new Image();
+                img.src = src;
+            });
+            Object.values(soundFiles).forEach(fileArray => {
+                fileArray.forEach(src => {
+                    const audio = new Audio();
+                    audio.src = src;
+                    audio.preload = 'auto';
+                });
+            });
+        }
+
+        // DOM elements
+        const playerEntryScreen = document.getElementById('player-entry');
+        const mainGameScreen = document.getElementById('main-game');
+        const finalScreen = document.getElementById('final-screen');
+        const startMultiplayerBtn = document.getElementById('start-multiplayer-btn');
+        const balloonImage = document.getElementById('balloon-image');
+        const playerScores = document.getElementById('player-scores');
+        const messagesContainer = document.getElementById('messagescontainer');
+        const attemptsRemaining = document.getElementById('attempts-remaining');
+        const guessContainer = document.getElementById('guesscontainer');
+        const lettersContainer = document.getElementById('letterscontainer');
+        const wordInput = document.getElementById('word-input');
+        const startGameBtn = document.getElementById('start-game');
+        const nextBtn = document.getElementById('next-btn');
+        const hintBtn = document.getElementById('hint-btn');
+        const queueCounter = document.getElementById('queue-counter');
+        const playAgainBtn = document.getElementById('play-again-btn');
+
+        // Audio player with fallback support
+        class AudioPlayer {
+            constructor(fileArray, loop = false) {
+                this.files = fileArray;
+                this.currentIndex = 0;
+                this.audio = new Audio(this.files[this.currentIndex]);
+                this.audio.loop = loop;
+            }
+
+            play() {
+                return this.audio.play().catch(error => {
+                    console.log(`Audio error with ${this.files[this.currentIndex]}:`, error);
+                    this.currentIndex++;
+                    if (this.currentIndex < this.files.length) {
+                        this.audio = new Audio(this.files[this.currentIndex]);
+                        this.audio.loop = this.audio.loop;
+                        return this.play();
+                    }
+                    return Promise.reject('All audio formats failed');
+                });
+            }
+        }
+
+        function playSound(soundKey) {
+            const player = new AudioPlayer(soundFiles[soundKey]);
+            player.play().catch(error => {
+                console.log(`Failed to play ${soundKey} sound:`, error);
+                if ('AudioContext' in window) {
+                    const ctx = new AudioContext();
+                    const osc = ctx.createOscillator();
+                    osc.type = 'square';
+                    osc.frequency.value = soundKey === 'correct' || soundKey === 'win' ? 440 : 220;
+                    osc.connect(ctx.destination);
+                    osc.start();
+                    setTimeout(() => osc.stop(), 200);
+                }
+            });
+        }
+
+        // Player Entry Logic
+        function setupPlayerEntry() {
+            const inputs = Array.from(document.querySelectorAll('.player-input-container input'));
+            inputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    const validNames = inputs.map(inp => inp.value.trim()).filter(name => name);
+                    startMultiplayerBtn.disabled = validNames.length === 0;
+                });
+            });
+
+            startMultiplayerBtn.addEventListener('click', () => {
+                const validNames = inputs.map(inp => inp.value.trim()).filter(name => name);
+                if (validNames.length > 0) {
+                    players = validNames.map(name => ({ name, score: 0 }));
+                    playerEntryScreen.style.display = 'none';
+                    mainGameScreen.style.display = 'flex';
+                    updatePlayerScores();
+                    initialSetup();
+                }
+            });
+        }
+
+        // 3-column player scores layout
+        function updatePlayerScores() {
+            playerScores.innerHTML = '';
+            players.forEach((player, index) => {
+                const div = document.createElement('div');
+                div.textContent = `${player.name}: ${player.score}`;
+                if (index === currentPlayerIndex) {
+                    div.style.fontWeight = 'bold';
+                    div.style.color = '#4CAF50';
+                }
+                if (index < 3) {
+                    div.style.gridRow = '1';
+                    div.style.gridColumn = `${index + 1}`;
+                } else {
+                    div.style.gridRow = '2';
+                    div.style.gridColumn = `${index - 2}`;
+                }
+                playerScores.appendChild(div);
+            });
+        }
+
+        // Initialize letter grid
+        function createLetterGrid() {
+            lettersContainer.innerHTML = '';
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const lettersPerRow = Math.ceil(alphabet.length / 4);
+            
+            for (let i = 0; i < 4; i++) {
+                const row = document.createElement('div');
+                row.className = 'letter-row';
+                const start = i * lettersPerRow;
+                const end = Math.min(start + lettersPerRow, alphabet.length);
+                
+                for (let j = start; j < end; j++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'letter-btn';
+                    btn.textContent = alphabet[j];
+                    btn.addEventListener('click', () => guessLetter(alphabet[j]));
+                    row.appendChild(btn);
+                }
+                lettersContainer.appendChild(row);
+            }
+        }
+
+        // Shuffle array function
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Update display with punctuation
+        function updateDisplay() {
+            guessContainer.innerHTML = '';
+            const words = currentWord.split(' ');
+            words.forEach((word, wordIndex) => {
+                const wordSpan = document.createElement('span');
+                wordSpan.className = 'word-wrapper';
+                word.split('').forEach(char => {
+                    const span = document.createElement('span');
+                    span.className = 'letter-space';
+                    if (/[a-zA-Z]/.test(char)) {
+                        span.textContent = guessedLetters.includes(char.toUpperCase()) ? char : '*';
+                    } else {
+                        span.textContent = char;
+                    }
+                    wordSpan.appendChild(span);
+                });
+                guessContainer.appendChild(wordSpan);
+                if (wordIndex < words.length - 1) {
+                    guessContainer.appendChild(document.createTextNode('\u00A0\u00A0\u00A0'));
+                }
+            });
+            attemptsRemaining.textContent = `Balloons remaining: ${attemptsLeft}`;
+        }
+
+        // Update balloon image
+        function updateImage() {
+            const stage = 7 - attemptsLeft;
+            balloonImage.src = balloonImages[stage];
+        }
+
+        // Guess letter
+        function guessLetter(letter) {
+            if (guessedLetters.includes(letter) || attemptsLeft <= 0) return;
+
+            guessedLetters.push(letter);
+            const btn = Array.from(lettersContainer.querySelectorAll('.letter-btn'))
+                .find(b => b.textContent === letter);
+
+            if (currentWord.toUpperCase().includes(letter)) {
+                btn.classList.add('correct');
+                const letterCount = currentWord.toUpperCase().split('')
+                    .filter(char => char === letter).length;
+                players[currentPlayerIndex].score += letterCount;
+                playSound('correct');
+            } else {
+                btn.classList.add('incorrect');
+                attemptsLeft--;
+                updateImage();
+                playSound('wrong');
+            }
+
+            btn.disabled = true;
+            updateDisplay();
+            updatePlayerScores();
+            checkGameStatus();
+
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+            if (attemptsLeft > 0 && currentWord) {
+                messagesContainer.textContent = `${players[currentPlayerIndex].name}'s turn!`;
+            }
+        }
+
+        // Check game status
+        function checkGameStatus() {
+            const currentDisplay = Array.from(guessContainer.querySelectorAll('.letter-space'))
+                .map(span => span.textContent).join('').replace(/\s+/g, ' ').trim();
+            
+            if (attemptsLeft <= 0) {
+                messagesContainer.textContent = `You Lose! The correct answer was: ${currentWord}`;
+                balloonImage.src = 'balloons0.jpg';
+                playSound('lose');
+                disableAllLetters();
+                hintBtn.disabled = true;
+                if (currentWordIndex >= wordQueue.length - 1) {
+                    showFinalScreen();
+                } else {
+                    nextBtn.style.display = 'inline-block';
+                }
+            } else if (!currentDisplay.includes('*')) {
+                messagesContainer.textContent = 'Word Completed!';
+                balloonImage.src = 'youwin.jpg';
+                playSound('win');
+                disableAllLetters();
+                hintBtn.disabled = true;
+                if (currentWordIndex >= wordQueue.length - 1) {
+                    showFinalScreen();
+                } else {
+                    nextBtn.style.display = 'inline-block';
+                }
+            }
+        }
+
+        // Show final screen with sorted scores and confetti
+        function showFinalScreen() {
+            setTimeout(() => {
+                mainGameScreen.style.display = 'none';
+                finalScreen.style.display = 'flex';
+                const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
+                const winner = sortedPlayers[0];
+                document.getElementById('winner-name').textContent = winner.name;
+                const finalScoresDiv = document.getElementById('final-scores');
+                finalScoresDiv.innerHTML = '';
+                sortedPlayers.forEach(player => {
+                    const div = document.createElement('div');
+                    div.textContent = `${player.name}: ${player.score}`;
+                    finalScoresDiv.appendChild(div);
+                });
+                startConfetti();
+            }, 3000);
+        }
+
+        // Confetti effect
+        function startConfetti() {
+            const colors = ['#ff0000', '#ff8000', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#8f00ff'];
+            function createConfetti() {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = `${3 + Math.random() * 2}s`;
+                finalScreen.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 5000);
+            }
+            for (let i = 0; i < 50; i++) {
+                setTimeout(createConfetti, i * 100);
+            }
+            setInterval(createConfetti, 200);
+        }
+
+        // Disable all letters
+        function disableAllLetters() {
+            lettersContainer.querySelectorAll('.letter-btn').forEach(btn => {
+                btn.disabled = true;
+            });
+        }
+
+        // Update queue counter
+        function updateQueueCounter() {
+            const currentDisplay = wordQueue.length > 0 ? (currentWordIndex + 1).toString().padStart(2, '0') : '00';
+            const totalDisplay = wordQueue.length.toString().padStart(2, '0');
+            queueCounter.textContent = `${currentDisplay}/${totalDisplay}`;
+        }
+
+        // Clear queue (kept for logic consistency, though button is removed)
+        function clearQueue() {
+            wordQueue = [];
+            currentWord = '';
+            currentWordIndex = 0;
+            attemptsLeft = 7;
+            guessedLetters = [];
+            messagesContainer.textContent = 'Queue cleared!';
+            wordInput.value = '';
+            guessContainer.innerHTML = '';
+            balloonImage.src = balloonImages[0];
+            updateDisplay();
+            createLetterGrid();
+            nextBtn.style.display = 'none';
+            hintBtn.disabled = true;
+            updateQueueCounter();
+        }
+
+        // Add to queue with input validation (kept for logic consistency)
+        function validateInput(input) {
+            const regex = /^[a-zA-Z0-9\s.,'-]{1,50}$/;
+            return regex.test(input);
+        }
+
+        function addToQueue() {
+            const newInput = wordInput.value.trim();
+            if (!newInput) {
+                messagesContainer.textContent = 'Please enter a word or phrase';
+                wordInput.classList.add('invalid');
+                setTimeout(() => wordInput.classList.remove('invalid'), 1000);
+            } else if (!validateInput(newInput)) {
+                messagesContainer.textContent = 'Use letters, numbers, spaces, or .,-\' (max 50 characters)';
+                wordInput.classList.add('invalid');
+                setTimeout(() => wordInput.classList.remove('invalid'), 1000);
+            } else {
+                wordQueue.push(newInput);
+                messagesContainer.textContent = `Added to queue!`;
+                wordInput.classList.remove('invalid');
+                wordInput.classList.add('valid');
+                setTimeout(() => wordInput.classList.remove('valid'), 1000);
+                wordInput.value = '';
+                updateQueueCounter();
+            }
+        }
+
+        // Start game
+        function startGame() {
+            if (wordQueue.length === 0) {
+                messagesContainer.textContent = 'Please add items to the queue first!';
+                return;
+            }
+            
+            wordQueue = shuffleArray([...wordQueue]);
+            currentWordIndex = 0;
+            currentWord = wordQueue[currentWordIndex];
+            attemptsLeft = 7;
+            guessedLetters = [];
+            currentPlayerIndex = 0;
+            updateImage();
+            updateDisplay();
+            createLetterGrid();
+            messagesContainer.textContent = `${players[currentPlayerIndex].name}'s turn!`;
+            nextBtn.style.display = 'none';
+            hintBtn.disabled = false;
+            updateQueueCounter();
+            updatePlayerScores();
+        }
+
+        // Next word
+        function nextWord() {
+            currentWordIndex++;
+            if (currentWordIndex < wordQueue.length) {
+                currentWord = wordQueue[currentWordIndex];
+                attemptsLeft = 7;
+                guessedLetters = [];
+                updateImage();
+                updateDisplay();
+                createLetterGrid();
+                messagesContainer.textContent = `${players[currentPlayerIndex].name}'s turn!`;
+                nextBtn.style.display = 'none';
+                hintBtn.disabled = false;
+                updatePlayerScores();
+            } else {
+                showFinalScreen();
+            }
+            updateQueueCounter();
+        }
+
+        // Hint System
+        function getHint() {
+            if (attemptsLeft <= 1) {
+                messagesContainer.textContent = 'Not enough balloons for a hint!';
+                return;
+            }
+
+            const unguessed = currentWord.split('')
+                .filter(char => /[a-zA-Z]/.test(char) && !guessedLetters.includes(char.toUpperCase()));
+            
+            if (unguessed.length === 0) {
+                messagesContainer.textContent = 'No more hints available!';
+                return;
+            }
+
+            const hintLetter = unguessed[Math.floor(Math.random() * unguessed.length)].toUpperCase();
+            attemptsLeft -= 1;
+            guessLetter(hintLetter);
+            messagesContainer.textContent = `Hint: Used letter ${hintLetter}`;
+            updateImage();
+        }
+
+        // Play Again Logic
+        function resetGame() {
+            wordQueue = [];
+            currentWord = '';
+            attemptsLeft = 7;
+            guessedLetters = [];
+            currentWordIndex = 0;
+            players = [];
+            currentPlayerIndex = 0;
+            finalScreen.style.display = 'none';
+            playerEntryScreen.style.display = 'flex';
+            mainGameScreen.style.display = 'none';
+            const inputs = document.querySelectorAll('.player-input-container input');
+            inputs.forEach(input => input.value = '');
+            startMultiplayerBtn.disabled = true;
+            messagesContainer.textContent = '';
+            guessContainer.innerHTML = '';
+            balloonImage.src = balloonImages[0];
+            updateQueueCounter();
+            playerScores.innerHTML = '';
+            document.querySelectorAll('.confetti').forEach(confetti => confetti.remove());
+        }
+
+        // Event listeners
+        startGameBtn.addEventListener('click', startGame);
+        nextBtn.addEventListener('click', nextWord);
+        hintBtn.addEventListener('click', getHint);
+        wordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addToQueue();
+        });
+        playAgainBtn.addEventListener('click', resetGame);
+
+        // Keyboard input for guessing
+        document.addEventListener('keydown', (e) => {
+            if (wordQueue.length === 0 || !currentWord || attemptsLeft <= 0) return;
+            const letter = e.key.toUpperCase();
+            if (/^[A-Z]$/.test(letter) && !guessedLetters.includes(letter)) {
+                guessLetter(letter);
+            }
+        });
+
+        // Initial setup
+        function initialSetup() {
+            messagesContainer.textContent = 'Add words or phrases to start';
+            attemptsRemaining.textContent = 'Balloons remaining: 7';
+            updateQueueCounter();
+            createLetterGrid();
+            hintBtn.disabled = true;
+            
+            const backgroundPlayer = new AudioPlayer(soundFiles.background, true);
+            backgroundPlayer.play().catch(error => {
+                console.log('Background audio playback failed:', error);
+            });
+        }
+
+        // Start with preloading and player entry
+        preloadAssets();
+        setupPlayerEntry();
+    </script>
+</body>
+</html>
